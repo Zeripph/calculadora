@@ -1,0 +1,21 @@
+/* static/css/style.css */
+
+body {
+    background-color: #f0f2f5; /* Um cinza claro para o fundo */
+}
+
+.card-header {
+    background: linear-gradient(45deg, #0d6efd, #0dcaf0); /* Um gradiente azul bonito */
+    border-bottom: 0;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+    border: none;
+    transition: transform 0.2s; /* Efeito suave ao passar o mouse */
+}
+
+.btn-primary:hover {
+    transform: scale(1.02); /* Aumenta um pouco o botão */
+    filter: brightness(1.1);
+}

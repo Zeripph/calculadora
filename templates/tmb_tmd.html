@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}TMB & TMD{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        
+        <div class="card shadow-lg">
+            <div class="card-header text-white text-center">
+                <h1 class="h3">Calculadora de TMB e TMD</h1>
+            </div>
+            <div class="card-body p-4">
+                
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="peso" class="form-label">Peso Corporal (kg)</label>
+                            <input type="number" class="form-control" name="peso" step="0.1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="altura" class="form-label">Altura (cm)</label>
+                            <input type="number" class="form-control" name="altura" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="idade" class="form-label">Idade (anos)</label>
+                            <input type="number" class="form-control" name="idade" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="genero" class="form-label">Gênero</label>
+                            <select class="form-select" name="genero" required>
+                                <option value="homem">Homem</option>
+                                <option value="mulher">Mulher</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="vo2max" class="form-label">Seu VO² máx (conhecido)</label>
+                            <input type="number" class="form-control" name="vo2max" step="0.1" required placeholder="Ex: 42.5">
+                            <div class="form-text">Necessário para calcular o Fator de Atividade (F.A) e a TMD.</div>
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary btn-lg">Calcular TMB & TMD</button>
+                    </div>
+                </form>
+                
+                {% if resultado_tmb and resultado_tmd %}
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="alert alert-success text-center" role="alert">
+                            <h4 class="alert-heading">TMB (Basal)</h4>
+                            <p class="display-5 fw-bold">{{ resultado_tmb }}</p>
+                            <hr>
+                            <p class="mb-0">Calorias/dia (em repouso)</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info text-center" role="alert">
+                            <h4 class="alert-heading">TMD (Diária)</h4>
+                            <p class="display-5 fw-bold">{{ resultado_tmd }}</p>
+                            <hr>
+                            <p class="mb-0">Calorias/dia (com atividade)</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

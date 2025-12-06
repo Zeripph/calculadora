@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Calculadoras de Treinamento (FC e Duração){% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+<div class="col-lg-8 col-md-10">
+
+{% if erro %}
+
+<div class="alert alert-danger text-center" role="alert">
+{{ erro }}
+</div>
+{% endif %}
+
+<div class="card shadow-lg mb-4">
+<div class="card-header text-white text-center bg-info" style="background-color: #17a2b8 !important;">
+<h1 class="h3">Calculadora de Análise de Treinamento</h1>
+<p class="mb-0">Calcule a Zona Alvo (FC) e a Duração do Treino simultaneamente.</p>
+</div>
+<div class="card-body p-4">
+<form method="POST">
+<h5 class="text-primary mt-2 mb-3">Dados de Frequência Cardíaca (FC)</h5>
+<div class="row">
+<div class="col-md-4 mb-3">
+<label for="idade" class="form-label">Idade (anos)</label>
+<input type="number" class="form-control" name="idade" value="{{ form_data.idade or '' }}" required min="10" max="100">
+</div>
+<div class="col-md-4 mb-3">
+<label for="fc_repouso" class="form-label">FC em Repouso (bpm)</label>
+<input type="number" class="form-control" name="fc_repouso" value="{{ form_data.fc_repouso or '' }}" required min="30" max="200">
+</div>
+<div class="col-md-4 mb-3">
+<label for="intensidade_perc" class="form-label">Intensidade Alvo (%)</label>
+<input type="number" class="form-control" name="intensidade_perc" value="{{ form_data.intensidade_perc or '50' }}" required min="50" max="50">
+</div>
+</div>
+
+        <h5 class="text-success mt-4 mb-3">Dados de Gasto Calórico (Duração)</h5>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="peso" class="form-label">Peso Corporal (kg)</label>
+                <input type="number" class="form-control" name="peso" step="0.1" value="{{ form_data.peso or '' }}" required min="20">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="vo2max" class="form-label">Seu VO₂ máx (ml/kg/min)</label>
+                <input type="number" class="form-control" name="vo2max" step="0.1" value="{{ form_data.vo2max or '' }}" required placeholder="Ex: 42" min="4.0">
+            </div>
+            <div class="col-md-4 mb-3"></div> 
+        </div>
+
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-info btn-lg text-white">Calcular Zona Alvo e Duração</button>
+        </div>
+    </form>
+</div>
+
+
+</div>
+
+{% if resultado_zona_alvo or resultado_duracao %}
+
+<div class="card shadow-lg mb-4">
+<div class="card-header text-white text-center bg-dark" style="background-color: #343a40 !important;">
+<h2 class="h4 mb-0">Resultados da Análise de Treinamento</h2>
+</div>
+<div class="card-body p-4">
+
+    {% if resultado_zona_alvo %}
+    <div class="alert alert-success text-center mb-4" role="alert">
+        <h4 class="alert-heading">Sua Zona Alvo de Treinamento (FC)</h4>
+        <p class="display-5 fw-bold">{{ resultado_zona_alvo }}</p>
+        <hr>
+        <p class="mb-0">FC calculada para <strong>{{ form_data.intensidade_perc or 'N/A'}}%</strong> de intensidade (Método Karvonen)</p>
+    </div>
+    {% endif %}
+
+    {% if resultado_duracao %}
+    <div class="alert alert-info text-center mb-4" role="alert">
+        <h4 class="alert-heading">Duração Recomendada do Treino</h4>
+        <p class="display-5 fw-bold">{{ resultado_duracao }}</p>
+        <hr>
+        <p class="mb-0">Para um gasto calórico de <strong>{{ passos.gasto_rec }} Kcal</strong> treinando a <strong>{{ form_data.intensidade_perc or 'N/A' }}%</strong></p>
+    </div>
+
+    <h5 class="text-center mt-3 text-muted">Detalhes do Cálculo de Duração (VO₂ e Kcal)</h5>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between align-items-center">Gasto calórico REC<span class="fw-bold">{{ passos.gasto_rec }} Kcal</span></li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">VO₂ Reserva<span class="fw-bold">{{ passos.vo2_res }} ml/kg/min</span></li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">VO₂ Treino (a {{ form_data.intensidade_perc or 'N/A'}}%)<span class="fw-bold">{{ passos.vo2_treino }} ml/kg/min</span></li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">MET Treino<span class="fw-bold">{{ passos.met_treino }} METs</span></li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">Gasto por minuto<span class="fw-bold text-success">{{ passos.kcal_min }} Kcal/min</span></li>
+    </ul>
+    {% endif %}
+
+</div>
+
+
+</div>
+{% endif %}
+
+{% if passos.kcal_min %}
+
+<div class="card shadow-lg mb-4">
+<div class="card-header text-white text-center bg-secondary" style="background-color: #6c757d !important;">
+<h2 class="h4 mb-0">Plano de Progressão de Volume (21 Dias)</h2>
+</div>
+<div class="card-body">
+<p class="text-center small text-muted">
+Cronograma de 21 sessões com progressão gradual (7 por semana). Gasto calórico semanal estimado usando **{{ passos.kcal_min }} Kcal/min**.
+</p>
+<div class="table-responsive">
+<table class="table table-striped table-bordered text-center">
+<thead class="table-light">
+<tr>
+<th>Sessão</th>
+<th>Duração (min)</th>
+<th>Gasto Kcal (por sessão)</th>
+<th class="table-warning">Kcal Semanal (7 Sessões)</th>
+</tr>
+</thead>
+<tbody>
+{# ---------------------------------------------------------------------- #}
+{# 1. EXTRAIR A DURAÇÃO BASE do resultado calculado (Ex: "27 minutos" -> 27) #}
+{% set duracao_base_str = resultado_duracao | default('30 minutos') | replace(' minutos', '') | replace(' minuto', '') %}
+{% set duracao_base = duracao_base_str | int %}
+
+{# 2. Definir kcal_min (do cálculo Flask) para cálculo do Gasto Calórico. #}
+{% set kcal_min_str = passos.kcal_min | default('5.5') %}
+{% set kcal_min = kcal_min_str | float %}
+{# ---------------------------------------------------------------------- #}
+
+                {% set d0 = duracao_base %}
+                {# Definição da lista de durações da Semana 1 (Corrigido o erro de sintaxe removendo os comentários inline) #}
+                {% set duracoes_s1 = [
+                    d0,                 
+                    d0 + 2,             
+                    d0 + 4,             
+                    d0,                 
+                    d0 + 6,             
+                    d0 + 8,             
+                    d0 + 10             
+                ] %}
+                {% set total_s1 = duracoes_s1 | sum %}
+                
+                <tr><td colspan="4" class="table-primary text-white text-uppercase fw-bold" style="background-color: #007bff !important;">SEMANA 1 (Dias 1-7)</td></tr>
+                <tr><td>1</td><td>{{ duracoes_s1[0] }}</td><td>{{ (duracoes_s1[0] * kcal_min) | round(0) }}</td><td rowspan="7" class="align-middle table-warning fw-bold text-primary">{{ (total_s1 * kcal_min) | round(0) }} Kcal</td></tr>
+                <tr><td>2</td><td>{{ duracoes_s1[1] }}</td><td>{{ (duracoes_s1[1] * kcal_min) | round(0) }}</td></tr> 
+                <tr><td>3</td><td>{{ duracoes_s1[2] }}</td><td>{{ (duracoes_s1[2] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>4</td><td>{{ duracoes_s1[3] }}</td><td>{{ (duracoes_s1[3] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>5</td><td>{{ duracoes_s1[4] }}</td><td>{{ (duracoes_s1[4] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>6</td><td>{{ duracoes_s1[5] }}</td><td>{{ (duracoes_s1[5] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>7</td><td>{{ duracoes_s1[6] }}</td><td>{{ (duracoes_s1[6] * kcal_min) | round(0) }}</td></tr>
+
+                {% set d7 = duracoes_s1[6] %}
+                {# Definição da lista de durações da Semana 2 #}
+                {% set duracoes_s2 = [
+                    d7 + 1,             
+                    d7 + 1,             
+                    d7 + 1,             
+                    d7 + 1 - 4,         
+                    d7 + 1 - 8,         
+                    d7 + 1 - 12,        
+                    d7 + 1 - 16         
+                ] %}
+                {% set total_s2 = duracoes_s2 | sum %}
+                
+                <tr><td colspan="4" class="table-primary text-white text-uppercase fw-bold" style="background-color: #007bff !important;">SEMANA 2 (Dias 8-14)</td></tr>
+                <tr><td>8</td><td>{{ duracoes_s2[0] }}</td><td>{{ (duracoes_s2[0] * kcal_min) | round(0) }}</td><td rowspan="7" class="align-middle table-warning fw-bold text-primary">{{ (total_s2 * kcal_min) | round(0) }} Kcal</td></tr>
+                <tr><td>9</td><td>{{ duracoes_s2[1] }}</td><td>{{ (duracoes_s2[1] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>10</td><td>{{ duracoes_s2[2] }}</td><td>{{ (duracoes_s2[2] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>11</td><td>{{ duracoes_s2[3] }}</td><td>{{ (duracoes_s2[3] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>12</td><td>{{ duracoes_s2[4] }}</td><td>{{ (duracoes_s2[4] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>13</td><td>{{ duracoes_s2[5] }}</td><td>{{ (duracoes_s2[5] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>14</td><td>{{ duracoes_s2[6] }}</td><td>{{ (duracoes_s2[6] * kcal_min) | round(0) }}</td></tr>
+
+                {% set d14 = duracoes_s2[6] %}
+                {# Definição da lista de durações da Semana 3 #}
+                {% set duracoes_s3 = [
+                    d14 + 20,           
+                    d14 + 20,           
+                    d14 + 20,           
+                    d14 + 20 - 4,       
+                    d14 + 20 - 8,       
+                    d14 + 20 - 12,      
+                    d14 + 20 - 16       
+                ] %}
+                {% set total_s3 = duracoes_s3 | sum %}
+                
+                <tr><td colspan="4" class="table-primary text-white text-uppercase fw-bold" style="background-color: #007bff !important;">SEMANA 3 (Dias 15-21)</td></tr>
+                <tr><td>15</td><td>{{ duracoes_s3[0] }}</td><td>{{ (duracoes_s3[0] * kcal_min) | round(0) }}</td><td rowspan="7" class="align-middle table-warning fw-bold text-primary">{{ (total_s3 * kcal_min) | round(0) }} Kcal</td></tr>
+                <tr><td>16</td><td>{{ duracoes_s3[1] }}</td><td>{{ (duracoes_s3[1] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>17</td><td>{{ duracoes_s3[2] }}</td><td>{{ (duracoes_s3[2] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>18</td><td>{{ duracoes_s3[3] }}</td><td>{{ (duracoes_s3[3] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>19</td><td>{{ duracoes_s3[4] }}</td><td>{{ (duracoes_s3[4] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>20</td><td>{{ duracoes_s3[5] }}</td><td>{{ (duracoes_s3[5] * kcal_min) | round(0) }}</td></tr>
+                <tr><td>21</td><td>{{ duracoes_s3[6] }}</td><td>{{ (duracoes_s3[6] * kcal_min) | round(0) }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+</div>
+{% endif %}
+
+</div>
+
+</div>
+{% endblock %}
